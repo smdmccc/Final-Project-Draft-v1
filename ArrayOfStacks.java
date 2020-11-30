@@ -1,41 +1,129 @@
 import ch02.stacks.*;
-   // If our Set of Stacks is an array, what structure is the Stack itself in?
-   // I think this is why we should all the use of generics below, as T
-public class ArrayOfStacks<T> extends ArrayBoundedStack<T> {
 
-   ArrayOfStacks<ArrayBoundedStack> stackSet = new ArrayOfStacks<ArrayBoundedStack>();
-   public int capacity;
-   public ArrayOfStacks(int capacity) {
-      this.capacity = capacity;
+public class ArrayOfStacks<T>
+{
+   private ArrayBoundedStack<ArrayBoundedStack<T>> stacks;
+   private final int STACK_CAPACITY = 10;
+   private final int DEFAULT_TOTAL_CAPACITY = 1000;
+   private int numberOfStacks;
+   
+   /**
+      This no-arg constructor uses the default settings of up to 100 stacks
+      of size 10 each.
+   */
+   public ArrayOfStacks()
+   {
+      this.stacks = new ArrayBoundedStack<ArrayBoundedStack<T>>(DEFAULT_TOTAL_CAPACITY / STACK_CAPACITY);
+      stacks.push( new ArrayBoundedStack<T>( STACK_CAPACITY ) );
+      numberOfStacks = 1;
    }
    
-   public ArrayBoundedStack getLastStack()   {
-      if(stackSet.size() == 0) return null;
-      return stackSet.get(stackSet.size() - 1);
-   } 
-   
-   // Push should behave identically to a single stack, 
-   // if Stack is at capacity then we must create a new stack.
-   // toAdd is what is being added to the Stack
-   public void push(int toAdd)   {
-      // identify the bottom stack 
-//      ArrayOfStacks<T> last = stackSet[topIndex];// get the last element in the array? or the last stack in this set?
-      // 
-//      T last = getLastStack();
-      
-      // if the last element of the stack does not equal null &&
-         // is not at capacity, add the to the last stack
-      if(last != null && !top.isFull()) {
-         top.push(toPush);
+   /**
+      The push method places element at the top of the top stack if 
+      possible, or throws StackOverflowException if the top stack is full.  
+      @param element The element to add to stack
+      @throws StackOverflowException if top stack is full
+   */
+   public void push(T element)
+   {
+      if (stacks.top().isFull() )
+      {
+         if (stacks.isFull() )
+         {
+            throw new StackOverflowException("Push attempted on full SetOfStacks");
+         }
+         else
+         {
+            stacks.push( new ArrayBoundedStack<T>( STACK_CAPACITY ) );
+            numberOfStacks++;
+         }
       }
-      // else create a new stack
-      else{
-         ArrayBoundedStack<T> stack = new ArrayBoundedStack(topIndex);
-         stack.push(toPush);
-         stackSet.push(stack);
-      }      
-   }
- /*  public int pop()  {
       
-   } */
+      stacks.top().push( element );
+      
+   }
+   
+   /**
+      The pop method removes the top element from the SetOfStacksArray. Throws
+      StackUnderflowException if empty.  
+      @throws StackUnderflowException
+   */
+   public void pop()
+   {
+      if (stacks.top().isEmpty() )
+      {
+         throw new StackUnderflowException("Pop attempted on an empty SetOfStacksArray");
+      }
+      else
+      {
+         stacks.top().pop();                 // pop top item from top stack
+         
+         // If top stack is now empty, pop the stack
+         if (stacks.top().isEmpty() )
+         {
+            stacks.pop();
+            numberOfStacks--;
+         }
+      }
+   }
+   
+   /**
+      The top method returns the top element from the SetOfStacksArray.  Throws
+      StackUnderflowException if empty.  
+      @return The top element
+      @throws StackUnderflowException
+   */
+   public T top()
+   {
+      if (stacks.top().isEmpty() )
+      {
+         throw new StackUnderflowException ("Top attempted on an empty SetOfStacksArray");
+      }
+      else
+      {
+         return stacks.top().top();
+      }
+   }
+   
+   
+   /**
+      The isEmpty method returns true if the SetOfStacksArray is empty, false
+      otherwise.
+      @return True if empty, false otherwise
+   */
+   public boolean isEmpty()
+   {
+      if (numberOfStacks == 1 && stacks.top().isEmpty() )
+      {
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+   
+   /**
+      The isFull method returns true if the SetOfStacksArray is full, 
+      false otherwise.
+      @return True if the SetOfStacksArray is full, false otherwise
+   */
+   public boolean isFull()
+   {
+      return (stacks.isFull() && stacks.top().isFull() );
+   }
+   
+   
+   /**
+      The numStacks method returns the number of stacks.  An empty 
+      SetOfStacksArray will always have one empty ArrayBoundedStack.
+      @return The number of stacks
+   */
+   public int numStacks()
+   {
+      return numberOfStacks;
+   }
+
+
+
 }
